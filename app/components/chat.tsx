@@ -31,6 +31,8 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import Toggle from "../icons/toggle.svg";
+import ToggleOn from "../icons/toggleOn.svg";
 
 import {
   ChatMessage,
@@ -383,6 +385,8 @@ export function ChatActions(props: {
   const couldStop = ChatControllerPool.hasPending();
   const stopAll = () => ChatControllerPool.stopAll();
 
+  const [internet, setInternet] = useState(false);
+
   // switch model
   const currentModel = chatStore.currentSession().mask.modelConfig.model;
   function nextModel() {
@@ -395,6 +399,8 @@ export function ChatActions(props: {
       session.mask.syncGlobalConfig = false;
     });
   }
+
+  const toggleInternet = () => setInternet(!internet);
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -419,6 +425,12 @@ export function ChatActions(props: {
           icon={<SettingsIcon />}
         />
       )}
+
+      <ChatAction
+        onClick={toggleInternet}
+        text={"use internet"}
+        icon={internet ? <ToggleOn /> : <Toggle />}
+      />
 
       <ChatAction
         onClick={nextTheme}
@@ -577,7 +589,7 @@ export function Chat() {
       return;
     }
     setIsLoading(true);
-    chatStore.onUserInput(userInput).then(() => setIsLoading(false));
+    chatStore.onUserInput(userInput, true).then(() => setIsLoading(false));
     localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
     setPromptHints([]);
@@ -700,7 +712,7 @@ export function Chat() {
     setIsLoading(true);
     const content = session.messages[userIndex].content;
     deleteMessage(userIndex);
-    chatStore.onUserInput(content).then(() => setIsLoading(false));
+    chatStore.onUserInput(content, true).then(() => setIsLoading(false));
     inputRef.current?.focus();
   };
 

@@ -6,7 +6,7 @@ import { getClientConfig } from "./config/client";
 
 export const metadata = {
   title: "Ubax",
-  description: "Your personal knowledge explore.",
+  description: "Your Personal Knowledge Explorer.",
   viewport: {
     width: "device-width",
     initialScale: 1,

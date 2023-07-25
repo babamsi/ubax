@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import axios from "axios";
 
 import { trimTopic } from "../utils";
 
@@ -16,6 +17,7 @@ import { api, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
+import { useEffect } from "react";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -91,7 +93,7 @@ interface ChatStore {
   currentSession: () => ChatSession;
   nextSession: (delta: number) => void;
   onNewMessage: (message: ChatMessage) => void;
-  onUserInput: (content: string) => Promise<void>;
+  onUserInput: (content: string, internet: boolean) => Promise<void>;
   summarizeSession: () => void;
   updateStat: (message: ChatMessage) => void;
   updateCurrentSession: (updater: (session: ChatSession) => void) => void;
@@ -278,7 +280,7 @@ export const useChatStore = create<ChatStore>()(
         get().summarizeSession();
       },
 
-      async onUserInput(content) {
+      async onUserInput(content, internet) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
@@ -298,6 +300,25 @@ export const useChatStore = create<ChatStore>()(
         });
 
         // get recent messages
+
+        async function checkInternt(): Promise<string> {
+          const msg = axios.post("https://1004-49-156-96-140.ngrok-free.app/", {
+            question: userContent,
+          });
+
+          const a = await msg.then((res) => res.data);
+          console.log(typeof a);
+          return a;
+        }
+
+        const inter = await checkInternt();
+        // console.log(inter)
+        // const inter:string = checkInternt();
+
+        // if (internet) {
+        //   inter = <String><any>checkInternt()
+        // }
+
         const recentMessages = get().getMessagesWithMemory();
         const sendMessages = recentMessages.concat(userMessage);
         const sessionIndex = get().currentSessionIndex;
@@ -322,7 +343,7 @@ export const useChatStore = create<ChatStore>()(
           onUpdate(message) {
             botMessage.streaming = true;
             if (message) {
-              botMessage.content = message;
+              botMessage.content = internet ? "" : message;
             }
             get().updateCurrentSession((session) => {
               session.messages = session.messages.concat();
@@ -331,7 +352,7 @@ export const useChatStore = create<ChatStore>()(
           onFinish(message) {
             botMessage.streaming = false;
             if (message) {
-              botMessage.content = message;
+              botMessage.content = inter;
               get().onNewMessage(botMessage);
             }
             ChatControllerPool.remove(
