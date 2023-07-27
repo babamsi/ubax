@@ -302,16 +302,19 @@ export const useChatStore = create<ChatStore>()(
         // get recent messages
 
         async function checkInternt(): Promise<string> {
-          const msg = axios.post("https://1004-49-156-96-140.ngrok-free.app/", {
-            question: userContent,
-          });
+          const msg = axios.post(
+            "https://1c99-49-156-101-207.ngrok-free.app/",
+            {
+              question: userContent,
+            },
+          );
 
           const a = await msg.then((res) => res.data);
           console.log(typeof a);
           return a;
         }
 
-        const inter = await checkInternt();
+        const inter = internet && (await checkInternt());
         // console.log(inter)
         // const inter:string = checkInternt();
 
@@ -352,7 +355,7 @@ export const useChatStore = create<ChatStore>()(
           onFinish(message) {
             botMessage.streaming = false;
             if (message) {
-              botMessage.content = inter;
+              botMessage.content = internet ? inter : message;
               get().onNewMessage(botMessage);
             }
             ChatControllerPool.remove(

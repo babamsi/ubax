@@ -33,6 +33,7 @@ import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
 import Toggle from "../icons/toggle.svg";
 import ToggleOn from "../icons/toggleOn.svg";
+import Flower from "../icons/flower.svg";
 
 import {
   ChatMessage,
@@ -327,7 +328,7 @@ function ChatAction(props: {
         } as React.CSSProperties
       }
     >
-      <div ref={iconRef} className={styles["icon"]}>
+      <div ref={iconRef} className={styles["icon"] + " no-dark"}>
         {props.icon}
       </div>
       <div className={styles["text"]} ref={textRef}>
@@ -365,7 +366,9 @@ export function ChatActions(props: {
   showPromptModal: () => void;
   scrollToBottom: () => void;
   showPromptHints: () => void;
+  toggleInternet: () => void;
   hitBottom: boolean;
+  internet: boolean;
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -385,8 +388,6 @@ export function ChatActions(props: {
   const couldStop = ChatControllerPool.hasPending();
   const stopAll = () => ChatControllerPool.stopAll();
 
-  const [internet, setInternet] = useState(false);
-
   // switch model
   const currentModel = chatStore.currentSession().mask.modelConfig.model;
   function nextModel() {
@@ -400,7 +401,7 @@ export function ChatActions(props: {
     });
   }
 
-  const toggleInternet = () => setInternet(!internet);
+  const toggleInternet = () => props.toggleInternet();
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -425,12 +426,13 @@ export function ChatActions(props: {
           icon={<SettingsIcon />}
         />
       )}
-
-      <ChatAction
-        onClick={toggleInternet}
-        text={"use internet"}
-        icon={internet ? <ToggleOn /> : <Toggle />}
-      />
+      <div className={styles["icon"] + " no-dark"}>
+        <ChatAction
+          onClick={toggleInternet}
+          text={"use internet"}
+          icon={props.internet ? <Toggle /> : <ToggleOn />}
+        />
+      </div>
 
       <ChatAction
         onClick={nextTheme}
@@ -589,7 +591,7 @@ export function Chat() {
       return;
     }
     setIsLoading(true);
-    chatStore.onUserInput(userInput, true).then(() => setIsLoading(false));
+    chatStore.onUserInput(userInput, internet).then(() => setIsLoading(false));
     localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
     setPromptHints([]);
@@ -712,7 +714,7 @@ export function Chat() {
     setIsLoading(true);
     const content = session.messages[userIndex].content;
     deleteMessage(userIndex);
-    chatStore.onUserInput(content, true).then(() => setIsLoading(false));
+    chatStore.onUserInput(content, internet).then(() => setIsLoading(false));
     inputRef.current?.focus();
   };
 
@@ -788,6 +790,7 @@ export function Chat() {
     );
 
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [internet, setinternet] = useState(false);
 
   const renameSession = () => {
     showPrompt(Locale.Chat.Rename, session.topic).then((newTopic) => {
@@ -1029,6 +1032,8 @@ export function Chat() {
           showPromptModal={() => setShowPromptModal(true)}
           scrollToBottom={scrollToBottom}
           hitBottom={hitBottom}
+          internet={internet}
+          toggleInternet={() => setinternet(!internet)}
           showPromptHints={() => {
             // Click again to close
             if (promptHints.length > 0) {
