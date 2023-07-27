@@ -302,16 +302,20 @@ export const useChatStore = create<ChatStore>()(
         // get recent messages
 
         async function checkInternt(): Promise<string> {
-          const msg = axios.post("http://bamsi.pythonanywhere.com//", {
-            question: userContent,
-          });
+          if (internet) {
+            const msg = axios.post("http://bamsi.pythonanywhere.com/", {
+              question: userContent,
+            });
 
-          const a = await msg.then((res) => res.data);
-          console.log(typeof a);
-          return a;
+            const a = await msg.then((res) => res.data);
+            console.log(typeof a);
+            return a;
+          } else {
+            return "";
+          }
         }
 
-        const inter = internet && (await checkInternt());
+        const inter = await checkInternt();
         // console.log(inter)
         // const inter:string = checkInternt();
 
