@@ -302,12 +302,9 @@ export const useChatStore = create<ChatStore>()(
         // get recent messages
 
         async function checkInternt(): Promise<string> {
-          const msg = axios.post(
-            "https://1c99-49-156-101-207.ngrok-free.app/",
-            {
-              question: userContent,
-            },
-          );
+          const msg = axios.post("http://bamsi.pythonanywhere.com//", {
+            question: userContent,
+          });
 
           const a = await msg.then((res) => res.data);
           console.log(typeof a);
