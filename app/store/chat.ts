@@ -18,6 +18,7 @@ import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { useEffect } from "react";
+import { headers } from "next/dist/client/components/headers";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -301,21 +302,36 @@ export const useChatStore = create<ChatStore>()(
 
         // get recent messages
 
-        async function checkInternt(): Promise<string> {
+        async function checkInternt(data): Promise<string> {
           if (internet) {
-            const msg = axios.post("http://bamsi.pythonanywhere.com/", {
-              question: userContent,
-            });
+            const response = await fetch(
+              "https://flowiseai-railway-production-ce43.up.railway.app/api/v1/prediction/74ea6bcc-e77a-4e3d-bc8d-5e0fbd21b142",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+              },
+            );
+            const result = await response.json();
+            return result;
 
-            const a = await msg.then((res) => res.data);
-            console.log(typeof a);
-            return a;
+            // const msg = axios.post("http://bamsi.pythonanywhere.com/", {
+            //   question: userContent,
+            // });
+
+            // const a = await msg.then((res) => res.data);
+            // console.log(typeof a);
+            // return a;
           } else {
             return "";
           }
         }
 
-        const inter = await checkInternt();
+        const inter = await checkInternt({ question: userContent }).then(
+          (res) => res,
+        );
         // console.log(inter)
         // const inter:string = checkInternt();
 

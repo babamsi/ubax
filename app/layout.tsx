@@ -32,7 +32,7 @@ export default function RootLayout({
       <head>
         <meta name="config" content={JSON.stringify(getClientConfig())} />
         <meta
-          http-equiv="Content-Security-Policy"
+          httpEquiv="Content-Security-Policy"
           content="upgrade-insecure-requests"
         />
 

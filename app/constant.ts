@@ -85,6 +85,10 @@ export const DEFAULT_MODELS = [
     available: false,
   },
   {
+    name: "text-davinci-003",
+    available: true,
+  },
+  {
     name: "gpt-4-0613",
     available: false,
   },
@@ -113,7 +117,7 @@ export const DEFAULT_MODELS = [
     available: true,
   },
   {
-    name: "gpt-3.5-turbo-16k",
+    name: "text-davinci-003",
     available: true,
   },
   {

@@ -120,7 +120,7 @@ export const useAppConfig = create<ChatConfigStore>()(
         const modelMap: Record<string, LLMModel> = {};
 
         for (const model of oldModels) {
-          model.available = false;
+          model.available = true;
           modelMap[model.name] = model;
         }
 
