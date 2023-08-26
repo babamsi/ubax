@@ -302,7 +302,9 @@ export const useChatStore = create<ChatStore>()(
 
         // get recent messages
 
-        async function checkInternt(data): Promise<string> {
+        async function checkInternt(data: {
+          question: string;
+        }): Promise<string> {
           if (internet) {
             const response = await fetch(
               "https://flowiseai-railway-production-ce43.up.railway.app/api/v1/prediction/74ea6bcc-e77a-4e3d-bc8d-5e0fbd21b142",
