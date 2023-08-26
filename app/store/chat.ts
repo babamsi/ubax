@@ -365,7 +365,7 @@ export const useChatStore = create<ChatStore>()(
           onUpdate(message) {
             botMessage.streaming = true;
             if (message) {
-              botMessage.content = internet ? "" : message;
+              botMessage.content = internet ? inter : message;
             }
             get().updateCurrentSession((session) => {
               session.messages = session.messages.concat();
