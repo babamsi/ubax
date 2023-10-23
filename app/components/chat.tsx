@@ -7,6 +7,9 @@ import React, {
   useCallback,
 } from "react";
 
+import { SpeechToTextComponent } from "./SpeechToTextComponent";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+
 import SendWhiteIcon from "../icons/send-white.svg";
 import BrainIcon from "../icons/brain.svg";
 import RenameIcon from "../icons/rename.svg";
@@ -502,7 +505,10 @@ export function Chat() {
   const [showExport, setShowExport] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [userInput, setUserInput] = useState("");
+  const [transcript, setTranscript] = useState("");
+  const [userInput, setUserInput] = useState(
+    transcript.length ? transcript : "",
+  );
   const [isLoading, setIsLoading] = useState(false);
   const { submitKey, shouldSubmit } = useSubmitHandler();
   const { scrollRef, setAutoScroll, scrollToBottom } = useScrollToBottom();
@@ -586,6 +592,8 @@ export function Chat() {
     const matchCommand = chatCommands.match(userInput);
     if (matchCommand.matched) {
       setUserInput("");
+      setTranscript("");
+      sessionStorage.setItem("transcript", "");
       setPromptHints([]);
       matchCommand.invoke();
       return;
@@ -594,6 +602,7 @@ export function Chat() {
     chatStore.onUserInput(userInput, internet).then(() => setIsLoading(false));
     localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
+    setTranscript("");
     setPromptHints([]);
     if (!isMobileScreen) inputRef.current?.focus();
     setAutoScroll(true);
@@ -608,6 +617,7 @@ export function Chat() {
         // if user is selecting a chat command, just trigger it
         matchedChatCommand.invoke();
         setUserInput("");
+        setTranscript("");
       } else {
         // or fill the prompt
         setUserInput(prompt.content);
@@ -816,6 +826,14 @@ export function Chat() {
       doSubmit(text);
     },
   });
+
+  const handleCallback = (childData: string) => {
+    // Update the name in the component's state
+    setTranscript(childData);
+    setUserInput(childData);
+  };
+
+  const transcriptedText = sessionStorage.getItem("transcript");
 
   return (
     <div className={styles.chat} key={session.id}>
@@ -1046,14 +1064,18 @@ export function Chat() {
             onSearch("");
           }}
         />
+
         <div className={styles["chat-input-panel-inner"]}>
           <textarea
             ref={inputRef}
             className={styles["chat-input"]}
             placeholder={Locale.Chat.Input(submitKey)}
-            onInput={(e) => onInput(e.currentTarget.value)}
+            onInput={(e) =>
+              onInput(!transcript.length ? e.currentTarget.value : transcript)
+            }
             value={userInput}
-            onKeyDown={onInputKeyDown}
+            // onChange = {() => setUserInput(userInput)}
+            // onKeyDown={onInputKeyDown}
             onFocus={() => setAutoScroll(true)}
             onBlur={() => setAutoScroll(false)}
             rows={inputRows}
@@ -1061,14 +1083,11 @@ export function Chat() {
             style={{
               fontSize: config.fontSize,
             }}
+            onKeyDown={(e) =>
+              e.key === "Enter" ? doSubmit(userInput) : onInputKeyDown(e)
+            }
           />
-          <IconButton
-            icon={<SendWhiteIcon />}
-            text={Locale.Chat.Send}
-            className={styles["chat-input-send"]}
-            type="primary"
-            onClick={() => doSubmit(userInput)}
-          />
+          <SpeechToTextComponent parentCallback={handleCallback} />
         </div>
       </div>
 
