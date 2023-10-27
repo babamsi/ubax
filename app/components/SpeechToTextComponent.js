@@ -113,11 +113,12 @@ export function SpeechToTextComponent({ parentCallback }) {
             RecognizedTranscript : {myTranscript}
         </div>
       </div> */}
+      <div className={styles["pulse-ring"]}></div>
       <IconButton
         icon={<SendWhiteIcon />}
-        text="Send"
+        text={!isListening ? "Record" : "Recording"}
         className={styles["chat-input-send"]}
-        type="primary"
+        type={!isListening ? "primary" : "danger"}
         onClick={() => {
           if (isListening) {
             stopListening();
@@ -127,6 +128,7 @@ export function SpeechToTextComponent({ parentCallback }) {
           }
         }}
       />
+      {/* <i className="fa fa-microphone" aria-hidden="true"></i> */}
     </div>
   );
 }
